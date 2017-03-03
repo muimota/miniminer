@@ -1,4 +1,8 @@
-#miniminer 
+#A stratum compatible miniminer
+#based in the documentation 
+#https://slushpool.com/help/#!/manual/stratum-protocol
+#2017 Martin Nadal for the Bittercoin project
+
 import socket
 import json
 import hashlib
@@ -7,11 +11,14 @@ from pprint import pprint
 import time
 import random
 
-address = '1Edh8qTf8H3xHQvKsFkQ39eNvHLN2URPU7'
+address = '1GvSP13YjQAu9VAa8J1Hvbc4n3N8kUE3Ch'
 nonce   = hex(random.randint(0,2**32-1))[2:].zfill(8)
+
 host    = 'stratum.solo.nicehash.com'
 port    = 3334
+
 print "address:{} nonce:{}".format(address,nonce)
+print "host:{} port:{}".format(host,port)
 
 sock    = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((host,port))
@@ -24,14 +31,14 @@ sub_details,extranonce1,extranonce2_size = response['result']
 #authorize workers
 sock.sendall(b'{"params": ["'+str(address)+'", "password"], "id": 2, "method": "mining.authorize"}\n')
 
-#we will get a 4 line 
+#we read 4 lines
 response = ''
 while response.count('\n') < 4:
     response += sock.recv(1024)
 
 #get rid of empty lines
 responses = [json.loads(res) for res in response.split('\n') if len(res.strip())>0]
-pprint(responses)
+
 #welcome message
 print responses[0]['params'][0]+'\n'
 
@@ -40,7 +47,6 @@ job_id,prevhash,coinb1,coinb2,merkle_branch,version,nbits,ntime,clean_jobs \
     = responses[1]['params']
 
 #target http://stackoverflow.com/a/22161019
-
 target = (nbits[2:]+'00'*(int(nbits[:2],16))).zfill(64)
 print 'target:{}\n'.format(target)
 
@@ -61,7 +67,6 @@ merkle_root = ''.join([merkle_root[i]+merkle_root[i+1] for i in range(0,len(merk
 
 print 'merkle_root:{}\n'.format(merkle_root)
 
-
 blockheader = version + prevhash + merkle_root + nbits + ntime + nonce +\
     '000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000'
     
@@ -72,9 +77,12 @@ hash = binascii.hexlify(hash)
 print 'hash: {}'.format(hash)
 
 if hash < target :
-    print 'successful mine!!'
+    print 'success!!'
     payload = '{"params": ["'+address+'", "'+job_id+'", "'+extranonce2 \
         +'", "'+ntime+'", "'+nonce+'"], "id": 1, "method": "mining.submit"}\n'
     sock.sendall(payload)
     print sock.recv(1024)
+else:
+    print 'failed mine, hash is greater than target'
+    
 sock.close()
