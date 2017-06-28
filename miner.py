@@ -1,5 +1,5 @@
 #A stratum compatible miniminer
-#based in the documentation 
+#based in the documentation
 #https://slushpool.com/help/#!/manual/stratum-protocol
 #2017 Martin Nadal for the Bittercoin project
 
@@ -39,8 +39,9 @@ while response.count('\n') < 4:
 #get rid of empty lines
 responses = [json.loads(res) for res in response.split('\n') if len(res.strip())>0]
 
+pprint(responses)
 #welcome message
-print responses[0]['params'][0]+'\n'
+#print responses[0]['params'][0]+'\n'
 
 
 job_id,prevhash,coinb1,coinb2,merkle_branch,version,nbits,ntime,clean_jobs \
@@ -52,7 +53,7 @@ print 'target:{}\n'.format(target)
 
 extranonce2 = '00'*extranonce2_size
 
-coinbase = coinb1 + extranonce1 + extranonce2 + coinb2 
+coinbase = coinb1 + extranonce1 + extranonce2 + coinb2
 coinbase_hash_bin = hashlib.sha256(hashlib.sha256(binascii.unhexlify(coinbase)).digest()).digest()
 
 print 'coinbase:\n{}\n\ncoinbase hash:{}\n'.format(coinbase,binascii.hexlify(coinbase_hash_bin))
@@ -69,7 +70,7 @@ print 'merkle_root:{}\n'.format(merkle_root)
 
 blockheader = version + prevhash + merkle_root + nbits + ntime + nonce +\
     '000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000'
-    
+
 print 'blockheader:\n{}\n'.format(blockheader)
 
 hash = hashlib.sha256(hashlib.sha256(binascii.unhexlify(blockheader)).digest()).digest()
@@ -84,5 +85,5 @@ if hash < target :
     print sock.recv(1024)
 else:
     print 'failed mine, hash is greater than target'
-    
+
 sock.close()
