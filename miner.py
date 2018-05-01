@@ -25,19 +25,21 @@ sock.connect((host,port))
 
 #server connection
 sock.sendall(b'{"id": 1, "method": "mining.subscribe", "params": []}\n')
-response = json.loads(sock.recv(1024))
+lines = sock.recv(1024).split('\n')
+response = json.loads(lines[0])
 sub_details,extranonce1,extranonce2_size = response['result']
 
 #authorize workers
 sock.sendall(b'{"params": ["'+str(address)+'", "password"], "id": 2, "method": "mining.authorize"}\n')
 
-#we read 4 lines
+#we read until 'mining.notify' is reached
 response = ''
-while response.count('\n') < 4:
+while response.count('\n') < 4 and not('mining.notify' in response):
     response += sock.recv(1024)
 
+
 #get rid of empty lines
-responses = [json.loads(res) for res in response.split('\n') if len(res.strip())>0]
+responses = [json.loads(res) for res in response.split('\n') if len(res.strip())>0 and 'mining.notify' in res]
 
 pprint(responses)
 #welcome message
@@ -45,7 +47,7 @@ pprint(responses)
 
 
 job_id,prevhash,coinb1,coinb2,merkle_branch,version,nbits,ntime,clean_jobs \
-    = responses[1]['params']
+    = responses[0]['params']
 
 #target http://stackoverflow.com/a/22161019
 target = (nbits[2:]+'00'*(int(nbits[:2],16))).zfill(64)
