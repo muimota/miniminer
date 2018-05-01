@@ -14,8 +14,8 @@ import random
 address = '1GvSP13YjQAu9VAa8J1Hvbc4n3N8kUE3Ch'
 nonce   = hex(random.randint(0,2**32-1))[2:].zfill(8)
 
-host    = 'stratum.solo.nicehash.com'
-port    = 3334
+host    = 'solo.ckpool.org'
+port    = 3333
 
 print "address:{} nonce:{}".format(address,nonce)
 print "host:{} port:{}".format(host,port)
