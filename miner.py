@@ -41,16 +41,13 @@ while response.count(b'\n') < 4 and not(b'mining.notify' in response):
 #get rid of empty lines
 responses = [json.loads(res) for res in response.decode().split('\n') if len(res.strip())>0 and 'mining.notify' in res]
 pprint(responses)
-#welcome message
-#print responses[0]['params'][0]+'\n'
-
 
 job_id,prevhash,coinb1,coinb2,merkle_branch,version,nbits,ntime,clean_jobs \
     = responses[0]['params']
 
-#target http://stackoverflow.com/a/22161019
-target = (nbits[2:]+'00'*(int(nbits[:2],16))).zfill(64)
-print('target:{}\n'.format(target))
+#target https://bitcoin.stackexchange.com/a/36228/44319
+target = (nbits[2:]+'00'*(int(nbits[:2],16) - 3)).zfill(64)
+print('nbits:{} target:{}\n'.format(nbits,target))
 
 extranonce2 = '00'*extranonce2_size
 
